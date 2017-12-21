@@ -30,7 +30,7 @@ class AddContactViewController: FormViewController {
                 row.placeholder = edit ? contactToEdit?.number : "+1-202-555-0182"
                 row.tag = "number"
             }
-            <<< TextRow() { row in
+            <<< EmailRow() { row in
                 row.title = "Email"
                 row.placeholder = edit ? contactToEdit?.email : "johnsmith@gmail.com"
                 row.tag = "email"
