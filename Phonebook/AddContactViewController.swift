@@ -17,8 +17,9 @@ class AddContactViewController: FormViewController {
         super.viewDidLoad()
         edit = contactToEdit != nil
         
+        self.title = edit ? "Edit Contact" : "New Contact"
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Done", style: .done, target: self, action: #selector(doneTapped))
-        form +++ Section(edit ? "Edit Contact" : "New Contact")
+        form +++ Section("")
             <<< TextRow(){ row in
                 row.title = "Name"
                 row.placeholder = edit ? contactToEdit?.name : "John Smith"

@@ -24,6 +24,7 @@ class ViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         
+        self.navigationController?.navigationBar.prefersLargeTitles = true
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "+", style: .done, target: self, action: #selector(addTapped))
     
         contacts = realm.objects(Contact.self)
