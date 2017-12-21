@@ -17,6 +17,8 @@ class ViewController: UIViewController {
     var contacts: Results<Contact>!
     var notificationToken: NotificationToken?
     let realm = RealmService.shared.realm
+    let searchController = UISearchController(searchResultsController: nil)
+    var filteredContacts = [Contact]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,6 +28,13 @@ class ViewController: UIViewController {
         
         self.navigationController?.navigationBar.prefersLargeTitles = true
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "+", style: .done, target: self, action: #selector(addTapped))
+        
+        searchController.searchResultsUpdater = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = "Search Contacts"
+        navigationItem.searchController = searchController
+        definesPresentationContext = true
+
     
         contacts = realm.objects(Contact.self)
         
@@ -77,13 +86,23 @@ class ViewController: UIViewController {
 
 extension ViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if isFiltering() {
+            return filteredContacts.count
+        }
         return contacts.count
     }
+        
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "ContactCell") as? ContactCell else { return UITableViewCell() }
         
-        let contact = contacts[indexPath.row]
+        let contact: Contact
+        if isFiltering() {
+            contact = filteredContacts[indexPath.row]
+        }
+        else {
+            contact = contacts[indexPath.row]
+        }
         cell.configure(with: contact)
         
         return cell
@@ -96,17 +115,49 @@ extension ViewController: UITableViewDataSource {
 
 extension ViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.contactToEdit = contacts[indexPath.row]
+        if isFiltering() {
+            contactToEdit = filteredContacts[indexPath.row]
+        }
+        else {
+            contactToEdit = contacts[indexPath.row]
+        }
         performSegue(withIdentifier: "ShowAddContactSegue", sender: self)
         print("selected")
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         guard editingStyle == .delete else { return }
-        let contact = contacts[indexPath.row]
+        let contact: Contact
+        if isFiltering() {
+            contact = filteredContacts[indexPath.row]
+        }
+        else {
+            contact = contacts[indexPath.row]
+        }
         RealmService.shared.delete(contact)
         self.tableView.deleteRows(at: [indexPath], with: .automatic)
         print("delete")
     }
 }
 
+extension ViewController: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        filterContentForSearchText(searchController.searchBar.text!)
+    }
+    
+    func searchBarIsEmpty() -> Bool {
+        return searchController.searchBar.text?.isEmpty ?? true
+    }
+    
+    func filterContentForSearchText(_ searchText: String, scop: String = "All") {
+        filteredContacts = contacts.filter({(contact: Contact) -> Bool in
+            return contact.name.lowercased().contains(searchText.lowercased())
+        })
+        
+        tableView.reloadData()
+    }
+    
+    func isFiltering() -> Bool {
+        return searchController.isActive && !searchBarIsEmpty()
+    }
+}
