@@ -80,7 +80,6 @@ class ViewController: UIViewController {
     
     @objc func addTapped() {
         performSegue(withIdentifier: "ShowAddContactSegue", sender: self)
-        print("add")
     }
 }
 
@@ -122,7 +121,6 @@ extension ViewController: UITableViewDelegate {
             contactToEdit = contacts[indexPath.row]
         }
         performSegue(withIdentifier: "ShowAddContactSegue", sender: self)
-        print("selected")
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
@@ -136,7 +134,6 @@ extension ViewController: UITableViewDelegate {
         }
         RealmService.shared.delete(contact)
         self.tableView.deleteRows(at: [indexPath], with: .automatic)
-        print("delete")
     }
 }
 
